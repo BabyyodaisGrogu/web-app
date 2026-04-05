@@ -1,8 +1,18 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { motion, useAnimate } from 'framer-motion'
+import LandingHero from './components/landing/LandingHero'
+import GooeyDoubleDiamondSection from './components/landing/GooeyDoubleDiamondSection'
+import { DOUBLE_DIAMOND_PHASES } from './components/landing/doubleDiamondConstants'
+import { useLandingIntroAnimation } from './hooks/useLandingIntroAnimation'
 
 function App() {
+  const [scope, animate] = useAnimate();
   const [isDark, setIsDark] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activePhase, setActivePhase] = useState(null);
+  const gooeyWrapRef = useRef(null);
+
+  useLandingIntroAnimation(scope, gooeyWrapRef, animate);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -13,8 +23,20 @@ function App() {
     setIsCollapsed(!isCollapsed);
   };
 
+  const scrollToDiamonds = () => {
+    gooeyWrapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
   return (
-    <div className={`page-wrapper ${isDark ? 'dark-mode' : ''}`}>
+    <div ref={scope} className={`page-wrapper ${isDark ? 'dark-mode' : ''} dd-page`}>
+      <div className="dd-logo-stage" aria-hidden="true">
+        <motion.img
+          src="/logo2.png"
+          alt=""
+          className="dd-logo"
+          initial={{ opacity: 1, scale: 1, rotate: 0 }}
+        />
+      </div>
 
       <div className="layout-horizontal">
         <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -80,17 +102,27 @@ function App() {
 
         <div className="main-content">
           <main>
-            <section className="hero">
-              <h1 className="hero-title">The Design Library.</h1>
-              <p className="subtitle">
-                A hands-on library of proven product processes, inspired by frameworks like <strong>Double Diamond</strong>, and designed for <strong>AI-Human Harmony</strong>.
-              </p>
-              <div className="hero-actions">
-                <button className="btn-get-started">
-                  Coming Soon
-                </button>
-              </div>
-            </section>
+            <div className="dd-hero-content">
+              <LandingHero
+                title={(
+                  <>
+                    AI Product
+                    <br />
+                    Development Library
+                  </>
+                )}
+                subtitle="A hands-on library of proven product processes, inspired by frameworks like Double Diamond, and designed for AI-Human Harmony."
+                ctaLabel="Get Started"
+                onCtaClick={scrollToDiamonds}
+              />
+              <GooeyDoubleDiamondSection
+                ref={gooeyWrapRef}
+                phases={DOUBLE_DIAMOND_PHASES}
+                activePhase={activePhase}
+                onPhaseHoverChange={setActivePhase}
+                onPhaseClick={(key) => console.log(key)}
+              />
+            </div>
 
 
 
